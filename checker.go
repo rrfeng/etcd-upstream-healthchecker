@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -71,9 +72,44 @@ func (_ *Checker) Check(p *Peer) error {
 		return errors.New("Return Status: " + strconv.Itoa(resp.StatusCode))
 	}
 
-	if p.Info.Weight != p.Info.CheckWeight && OkStatus[resp.StatusCode] == true {
+	if p.Info.Status == "down" && OkStatus[resp.StatusCode] == true {
 		return errors.New("Peer Up")
 	}
 
 	return nil
+}
+
+func HandleResult(etcd EtcdApi, c chan CheckResult) {
+	for res := range c {
+		if res.Result.Error() == "Peer Up" {
+			err := etcd.SetPeerUp(res.Target)
+			if err != nil {
+				log.Println("Set peer up error: ", err.Error())
+			} else {
+				log.Println("Peer recover:", res.Target)
+			}
+		} else {
+			err := etcd.SetPeerDown(res.Target)
+			if err != nil {
+				log.Println("Set peer down error: ", err.Error())
+			} else {
+				log.Println("Checked down:", res.Target, res.Result.Error())
+			}
+		}
+	}
+}
+
+func RunCheck(ck chan Checker, cp chan *Peer, ce chan CheckResult) {
+	for {
+		c := <-ck
+		go func(c Checker) {
+			p := <-cp
+			err := c.Check(p)
+			if err != nil {
+				result := CheckResult{Target: p, Result: err}
+				ce <- result
+			}
+			ck <- c
+		}(c)
+	}
 }

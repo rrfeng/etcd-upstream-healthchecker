@@ -1,8 +1,9 @@
 package main
 
 import (
-	//	"encoding/json"
+	"fmt"
 	"strconv"
+	//	"strings"
 )
 
 type Peer struct {
@@ -13,9 +14,9 @@ type Peer struct {
 }
 
 type PeerInfo struct {
-	CheckUrl    string `json:"checkurl"`
-	Weight      int    `json:"weight"`
-	CheckWeight int    `json:"checkweight"`
+	CheckUrl string `json:"checkurl"`
+	Weight   int    `json:"weight"`
+	Status   string `json:"status"`
 }
 
 func (p *Peer) GetCheckUrl() string {
@@ -41,4 +42,8 @@ func (p *Peer) IndexOf(ps [](*Peer)) (bool, int) {
 		}
 	}
 	return false, l
+}
+
+func (p *Peer) String() string {
+	return fmt.Sprintf("[%s %s:%d]", p.Name, p.Ip, p.Port)
 }
