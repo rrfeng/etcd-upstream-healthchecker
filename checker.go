@@ -8,6 +8,7 @@ import (
 )
 
 type Checker struct {
+	Client http.Client
 }
 
 type CheckResult struct {
@@ -62,9 +63,9 @@ var OkStatus = map[int]bool{100: true,
 	505: false,
 	511: false}
 
-func (_ *Checker) Check(p *Peer) error {
+func (c *Checker) Check(p *Peer) error {
 	url := p.GetCheckUrl()
-	resp, err := http.Get(url)
+	resp, err := c.Client.Get(url)
 
 	if err != nil {
 		return err
