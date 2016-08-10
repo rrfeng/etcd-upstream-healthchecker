@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 	"log"
@@ -107,7 +108,7 @@ func (e *EtcdApi) SetPeerDown(p *Peer) error {
 	}
 
 	value := string(info)
-	key := e.Path + "/" + p.Name + "/" + p.Ip + ":" + strconv.Itoa(p.Port)
+	key := fmt.Sprintf("%s/%s/%s:%d", e.Path, p.Name, p.Ip, p.Port)
 
 	_, err = e.Api.Set(e.Ctx, key, value, nil)
 	if err != nil {
@@ -131,7 +132,7 @@ func (e *EtcdApi) SetPeerUp(p *Peer) error {
 	}
 
 	value := string(info)
-	key := e.Path + "/" + p.Name + "/" + p.Ip + ":" + strconv.Itoa(p.Port)
+	key := fmt.Sprintf("%s/%s/%s:%d", e.Path, p.Name, p.Ip, p.Port)
 
 	_, err = e.Api.Set(e.Ctx, key, value, nil)
 	if err != nil {
