@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	//	"strings"
 )
 
 type Peer struct {
-	Name string
-	Ip   string
-	Port int
-	Info *PeerInfo
+	Name  string
+	Ip    string
+	Port  int
+	Info  *PeerInfo
+	Fails int
 }
 
 type PeerInfo struct {
@@ -21,9 +20,9 @@ type PeerInfo struct {
 
 func (p *Peer) GetCheckUrl() string {
 	if p.Info.CheckUrl != "" {
-		return p.Ip + ":" + strconv.Itoa(p.Port) + p.Info.CheckUrl
+		return fmt.Sprintf("http://%s:%d%s", p.Ip, p.Port, p.Info.CheckUrl)
 	} else {
-		return "http://" + p.Ip + ":" + strconv.Itoa(p.Port) + "/"
+		return fmt.Sprintf("http://%s:%d/", p.Ip, p.Port)
 	}
 }
 
@@ -45,5 +44,5 @@ func (p *Peer) IndexOf(ps [](*Peer)) (bool, int) {
 }
 
 func (p *Peer) String() string {
-	return fmt.Sprintf("[%s %s:%d]", p.Name, p.Ip, p.Port)
+	return fmt.Sprintf("[%s %s:%d fails:%d]", p.Name, p.Ip, p.Port, p.Fails)
 }

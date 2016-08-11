@@ -10,23 +10,20 @@ import (
 	"time"
 )
 
-var ETCD *string = flag.String("e", "127.0.0.1:2379", "The etcd endpoints")
-var SVCDIR *string = flag.String("s", "/v1/pre/services", "The service dir in etcd")
-var TIMEOUT *int64 = flag.Int64("t", 1000, "Timeout of the check, by ms, at least 10")
-var INTERVAL *int64 = flag.Int64("i", 5000, "Interval of check, by ms, at least 100")
-var CONCURRENCY *int = flag.Int("c", 50, "Concurrency of check")
+var c *string = flag.String("c", "./default.yml", "The config file path.")
 
 func main() {
 	flag.Parse()
 
-	if *INTERVAL < 100 || *TIMEOUT < 10 {
-		log.Fatalln("Timeout or interval out of range, may cause problem.")
+	config, err := ReadConfig(*c)
+	if err != nil {
+		log.Fatalln("Read config error:", err.Error())
 	}
 
-	PATH := strings.TrimSuffix(*SVCDIR, "/")
+	PATH := strings.TrimSuffix(config.ServiceDir, "/")
 
 	var cfg = client.Config{
-		Endpoints: strings.Split(*ETCD, ","),
+		Endpoints: config.EtcdEndpoints,
 	}
 
 	c, err := client.New(cfg)
@@ -57,21 +54,21 @@ func main() {
 	go etcd.StartWatch(index, &ps)
 
 	chTask := make(chan *Peer)
-	chChecker := make(chan Checker, *CONCURRENCY)
+	chChecker := make(chan Checker, config.Concurrency)
 	chResult := make(chan CheckResult)
 
-	for i := 0; i < *CONCURRENCY; i++ {
-		c := Checker{Client: http.Client{Timeout: time.Duration(*TIMEOUT) * time.Millisecond}}
+	for i := 0; i < config.Concurrency; i++ {
+		c := Checker{Client: http.Client{Timeout: time.Duration(config.CheckTimeout) * time.Millisecond}}
 		chChecker <- c
 	}
 
-	go HandleResult(etcd, chResult)
-	go RunCheck(chChecker, chTask, chResult)
+	go HandleResult(etcd, chResult, config)
+	go RunCheck(chChecker, chTask, chResult, config)
 
 	for {
 		for _, p := range ps {
 			chTask <- p
 		}
-		time.Sleep(time.Duration(*INTERVAL) * time.Millisecond)
+		time.Sleep(time.Duration(config.CheckInterval) * time.Millisecond)
 	}
 }
