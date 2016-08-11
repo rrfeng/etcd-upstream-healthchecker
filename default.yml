@@ -5,6 +5,9 @@ etcdendpoints:
 # The service regist dir in etcd
 servicedir: "/v1/test/services"
 
+# Default check url
+defaultcheckurl: "/"
+
 # When to check, exceed the timeout as fail, by ms
 checktimeout: 1000
 

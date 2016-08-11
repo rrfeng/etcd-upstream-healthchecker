@@ -17,7 +17,7 @@ type CheckResult struct {
 }
 
 func (c *Checker) Check(p *Peer, config *Config) error {
-	url := p.GetCheckUrl()
+	url := p.GetCheckUrl(config)
 	resp, err := c.Client.Get(url)
 
 	if err != nil {

@@ -18,11 +18,11 @@ type PeerInfo struct {
 	Status   string `json:"status"`
 }
 
-func (p *Peer) GetCheckUrl() string {
+func (p *Peer) GetCheckUrl(c *Config) string {
 	if p.Info.CheckUrl != "" {
 		return fmt.Sprintf("http://%s:%d%s", p.Ip, p.Port, p.Info.CheckUrl)
 	} else {
-		return fmt.Sprintf("http://%s:%d/", p.Ip, p.Port)
+		return fmt.Sprintf("http://%s:%d%s", p.Ip, p.Port, c.DefaultCheckUrl)
 	}
 }
 

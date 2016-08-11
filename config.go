@@ -7,14 +7,15 @@ import (
 )
 
 type Config struct {
-	EtcdEndpoints []string
-	ServiceDir    string `ymal:"ServiceDir"`
-	CheckTimeout  int
-	CheckInterval int
-	Concurrency   int
-	MaxFails      int
-	RetryDelay    int
-	OkStatus      []int
+	EtcdEndpoints   []string
+	ServiceDir      string `ymal:"ServiceDir"`
+	CheckTimeout    int
+	CheckInterval   int
+	Concurrency     int
+	MaxFails        int
+	RetryDelay      int
+	OkStatus        []int
+	DefaultCheckUrl string
 }
 
 func ReadConfig(fpath string) (*Config, error) {
